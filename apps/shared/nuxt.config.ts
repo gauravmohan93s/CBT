@@ -16,11 +16,11 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: {
-        'class': 'dark overflow-hidden',
+        'class': 'overflow-hidden',
         'data-theme-variant': 'blue',
         'lang': 'en',
       },
-      title: 'PDF2CBT - Turn PDF of Questions into CBT (Computer Based Test)',
+      title: 'MockCBT - Professional Online Testing Platform',
       meta: [
         {
           name: 'description',

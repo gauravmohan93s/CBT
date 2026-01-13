@@ -4,7 +4,7 @@
     close-button
     rich-colors
     offset="80px"
-    theme="dark"
+    theme="light"
     :duration="10000"
     :position="toastPosition"
   />

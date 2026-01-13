@@ -17,5 +17,8 @@
     "generate:web": "pnpm --filter ./apps/web generate",
     "prepare:web": "pnpm --filter ./apps/web prepare"
   },
-  "version": "1.30.2"
+  "version": "1.30.2",
+  "dependencies": {
+    "@nuxtjs/supabase": "^2.0.3"
+  }
 }
