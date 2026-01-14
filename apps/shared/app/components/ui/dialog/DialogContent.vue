@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
+import { useId, type HTMLAttributes } from 'vue'
 import { reactiveOmit } from '@vueuse/core'
 import { X } from 'lucide-vue-next'
 import {
   DialogClose,
   DialogContent,
-
+  DialogDescription,
   DialogPortal,
   useForwardPropsEmits,
 } from 'reka-ui'
@@ -13,10 +13,16 @@ import type { DialogContentEmits, DialogContentProps } from 'reka-ui'
 import DialogOverlay from './DialogOverlay.vue'
 import { cn } from '#layers/shared/app/lib/utils'
 
-const props = defineProps<DialogContentProps & { class?: HTMLAttributes['class'], nonClosable?: boolean }>()
+const props = defineProps<DialogContentProps & {
+  class?: HTMLAttributes['class']
+  nonClosable?: boolean
+  description?: string
+}>()
 const emits = defineEmits<DialogContentEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class', 'nonClosable')
+const descriptionId = useId()
+const resolvedDescription = computed(() => props.description || 'Dialog content')
 
 const preventClosingIfNonClosable = computed(() => {
   if (!props.nonClosable) return {}
@@ -36,7 +42,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
     <DialogContent
       data-slot="dialog-content"
       v-bind="forwarded"
-      :aria-describedby="undefined"
+      :aria-describedby="descriptionId"
       :class="
         cn(
           'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg',
@@ -48,6 +54,12 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
           return e.preventDefault()
       }"
     >
+      <DialogDescription
+        :id="descriptionId"
+        class="sr-only"
+      >
+        {{ resolvedDescription }}
+      </DialogDescription>
       <slot />
 
       <DialogClose

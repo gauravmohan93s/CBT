@@ -591,8 +591,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'CBT Interface - PDF2CBT',
-})
+      title: 'CBT Interface - MockCBT',})
 
 const testSummaryDataTableKeys: (keyof TestSummaryDataTableRow)[] = [
   'section', 'totalQuestions',
@@ -1280,7 +1279,7 @@ function loadQuestionImgUrlsToResultsUrlsState(testId: number) {
 
 const downloadTestData = () => {
   const blob = new Blob([JSON.stringify(testOutputData, null, 2)], { type: 'application/json' })
-  utilSaveFile('pdf2cbt_test_data.json', blob)
+  utilSaveFile('mockcbt_test_data.json', blob)
 }
 
 onBeforeUnmount(pageCleanUpCallback)

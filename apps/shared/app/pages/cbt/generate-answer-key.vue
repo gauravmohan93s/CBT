@@ -314,8 +314,7 @@ interface DBTestOutputDataState {
 }
 
 useSeoMeta({
-  title: 'Generate Answer Key - PDF2CBT',
-})
+      title: 'Generate Answer Key - MockCBT',})
 
 const tooltipContent = {
   questionsNumberingOrderType: () =>
@@ -400,8 +399,7 @@ const subjectsAnswerKeysData = ref<SubjectsAnswerKeysData | null>(null)
 const generateOutputState = shallowReactive({
   showDialog: false,
   selectedFileType: 'json' as 'zip' | 'json',
-  filename: 'pdf2cbt_answer_key',
-  preparingDownload: false,
+      filename: 'mockcbt_answer_key',  preparingDownload: false,
   downloaded: false,
 })
 

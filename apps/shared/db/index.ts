@@ -28,7 +28,7 @@ import type {
   SettingsData,
   TestOutputDataDB,
   TestNotesDB,
-  IPdf2CbtDB,
+  IMockCbtDB,
   PatternModeConfigDB,
 } from '#layers/shared/shared/types/db'
 import { MigrateJsonData } from '#layers/shared/app/src/scripts/migrate-json-data'
@@ -45,7 +45,7 @@ type TestSectionListItemDB = TestSectionListItem & {
   id: number
 }
 
-export class Pdf2CbtDB extends Dexie implements IPdf2CbtDB {
+export class MockCbtDB extends Dexie implements IMockCbtDB {
   settingsData!: EntityTable<SettingsDataWithID, 'id'>
   testSectionsList!: EntityTable<TestSectionListItemDB, 'id'>
   currentTestState!: EntityTable<CurrentTestStateDB, 'id'>

@@ -1,8 +1,8 @@
-import { Pdf2CbtDB } from '#layers/shared/db'
+import { MockCbtDB } from '#layers/shared/db'
 
-let db: Pdf2CbtDB | null = null
+let db: MockCbtDB | null = null
 export default () => {
   if (!db)
-    db = new Pdf2CbtDB()
+    db = new MockCbtDB()
   return db
 }

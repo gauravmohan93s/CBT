@@ -5,14 +5,16 @@ const enableSeoModules = import.meta.env.DISABLE_SEO_MODULES === 'true' ? false 
 
 export default defineNuxtConfig({
   extends: ['../shared'],
+  pages: true,
+  srcDir: 'app',
   modules: ['@nuxtjs/robots', '@nuxtjs/sitemap', 'nuxt-og-image', '@nuxtjs/supabase'],
   $meta: {
     name: 'web',
     title: 'MockCBT',
   },
-  css: ['./app/assets/css/main.css'],
+  css: ['~/assets/css/main.css'],
   site: {
-    url: 'https://pdf2cbt.vercel.app',
+    url: 'https://mockcbt.vercel.app',
   },
   runtimeConfig: {
     public: {
@@ -24,7 +26,7 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
-  compatibilityDate: '2025-03-17',
+  compatibilityDate: '2026-01-13',
   vite: {
     define: {
       'import.meta.env.PROJECT_VERSION': `"${packageJson.version}"`,

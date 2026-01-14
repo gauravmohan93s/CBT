@@ -11,8 +11,7 @@ const props = defineProps({
 console.error(props.error)
 
 useSeoMeta({
-  title: () => `${props.error.statusCode} - ${props.error.statusMessage} | PDF2CBT`,
-})
+      title: () => `${props.error.statusCode} - ${props.error.statusMessage} | MockCBT`,})
 </script>
 
 <template>

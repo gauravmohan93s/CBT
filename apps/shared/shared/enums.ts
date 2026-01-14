@@ -32,18 +32,18 @@ export enum ResultsPagePanels {
 }
 
 export enum LocalStorageKeys {
-  AppSettings = 'pdf2cbt-app-settings',
-  UpdatesState = 'pdf2cbt-updates-state',
+  AppSettings = 'mockcbt-app-settings',
+  UpdatesState = 'mockcbt-updates-state',
   ResultsPageSettings = 'CBT-ResultsPageSettings',
   PdfCropperPageSettings = 'PDFCropperSettings',
-  PagesSettings = 'pdf2cbt-pages-settings',
+  PagesSettings = 'mockcbt-pages-settings',
 }
 
 export enum DeprecatedLocalStorageKeys {
   ResultsQuestionPanelWidth = 'CBT-ResultsQuestionPanelWidth',
   ResultsQuestionPanelImgBgColor = 'CBT-ResultsQuestionPanelImgBgColor',
   PDfCropperOldSettings = 'pdf-cropper-settings',
-  AppThemeVariant = 'pdf2cbt-theme-variant',
+  AppThemeVariant = 'mockcbt-theme-variant',
 }
 
 export enum CBTInterfaceQueryParams {

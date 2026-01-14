@@ -46,7 +46,7 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
-  compatibilityDate: '2025-03-17',
+  compatibilityDate: '2026-01-13',
   vite: {
     esbuild: {
       legalComments: 'none',

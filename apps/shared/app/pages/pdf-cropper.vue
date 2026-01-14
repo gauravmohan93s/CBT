@@ -508,8 +508,7 @@ type PdfCropperTestConfig = Omit<PdfCropperJsonOutput['testConfig'], 'optionalQu
   & Required<Pick<PdfCropperJsonOutput['testConfig'], 'optionalQuestions'>>
 
 useSeoMeta({
-  title: 'PDF Cropper - PDF2CBT',
-})
+      title: 'PDF Cropper - MockCBT',})
 
 const selectOptions = {
   outputFileType: ['.zip', '.json'],
@@ -572,8 +571,7 @@ const jsonOutputData = shallowRef<JsonOutputData>(
 const pdfPageScrollAreaElem = useTemplateRef('pdfPageScrollAreaElem')
 
 const generateOutputState = shallowReactive({
-  filename: 'pdf2cbt_cropperdata',
-  fileType: '.zip',
+      filename: 'mockcbt_cropperdata',  fileType: '.zip',
   preGenerateImages: true,
   preGenerateImagesScale: 2,
   generatingImages: false,

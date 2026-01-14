@@ -24,7 +24,7 @@ export type PatternModeConfigDB = {
   }
 }
 
-export interface IPdf2CbtDB {
+export interface IMockCbtDB {
   getSettings(): Promise<SettingsData | null>
   replaceSettings(data: SettingsData): Promise<number>
   addLog(testLog: TestLog): Promise<number>

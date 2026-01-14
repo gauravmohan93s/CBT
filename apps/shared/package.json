@@ -1,7 +1,7 @@
 {
-  "name": "pdf2cbt",
+  "name": "mockcbt-shared",
   "private": true,
-  "description": "Turn PDF of questions into CBT (Computer-Based Test)",
+  "description": "MockCBT - SaaS Platform for Computer-Based Tests",
   "license": "AGPL-3.0-or-later",
   "author": {
     "name": "TheMoonVyy",

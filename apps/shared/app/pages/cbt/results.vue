@@ -247,8 +247,7 @@ const computedTestName = computed(() => {
 })
 
 useSeoMeta({
-  title: () => 'Test Results - PDF2CBT'
-    + (computedTestName.value ? ` | ${computedTestName.value}` : ''),
+      title: () => 'Test Results - MockCBT'    + (computedTestName.value ? ` | ${computedTestName.value}` : ''),
 })
 
 // stores data for score card component
@@ -1160,7 +1159,7 @@ async function processImportExport(
 
       if (testOutputDatas.length > 0) {
         const outputBlob = new Blob([JSON.stringify({ testOutputDatas })], { type: 'application/json' })
-        utilSaveFile('pdf2cbt_test_results.json', outputBlob)
+        utilSaveFile('mockcbt_test_results.json', outputBlob)
       }
     }
     catch (err) {

@@ -8,15 +8,15 @@
         <span class="font-bold text-2xl sm:text-[1.76rem] md:text-[1.9rem] py-1.5 px-2">
           <NuxtLink
             to="/"
-            class="text-green-500"
+            class="text-primary"
           >
             MockCBT
-            <span class="text-cyan-500 text-sm sm:text-[.9rem] md:text-base">v{{ appVersion }}</span>
+            <span class="text-muted-foreground text-sm sm:text-[.9rem] md:text-base">v{{ appVersion }}</span>
           </NuxtLink>
         </span>
         <div class="hidden min-[73.5rem]:flex items-center mx-auto">
           <template
-            v-for="item in [pdfCropperItem, ...cbtItems]"
+            v-for="item in visibleNavItems"
             :key="item.title"
           >
             <NuxtLink
@@ -27,7 +27,7 @@
               <template #default="{ isActive }">
                 <div
                   class="flex gap-1.5 justify-center"
-                  :class="[navigationMenuTriggerStyle(), 'h-full', isActive ? 'text-green-400' : '']"
+                  :class="[navigationMenuTriggerStyle(), 'h-full', isActive ? 'text-primary' : '']"
                 >
                   <Icon
                     :name="item.icon"
@@ -60,7 +60,7 @@
               <BaseButton
                 variant="default"
                 size="sm"
-                class="bg-blue-600 hover:bg-blue-500 text-white"
+                class="bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 Login
               </BaseButton>
@@ -71,7 +71,7 @@
             variant="outline"
             size="icon"
             title="Toggle Fullscreen"
-            class="text-green-500 hover:text-green-600"
+            class="text-primary hover:text-primary/90"
             icon-name="material-symbols:fullscreen"
             icon-size="1.5rem"
             @click="toggleFullscreen()"
@@ -108,7 +108,7 @@
                   class="grid grid-cols-1 gap-2 p-2 min-[43rem]:hidden"
                 >
                   <li
-                    v-for="contentItem in [pdfCropperItem, ...cbtItems]"
+                    v-for="contentItem in visibleNavItems"
                     :key="contentItem.title"
                   >
                     <UiSheetClose as-child>
@@ -126,7 +126,7 @@
                         >
                           <div
                             class="flex items-center gap-2.5 p-1"
-                            :class="isActive ? 'text-green-400' : ''"
+                            :class="isActive ? 'text-primary' : ''"
                           >
                             <Icon
                               :name="contentItem.icon"
@@ -197,6 +197,46 @@
                     </BaseButton>
                   </UiCardContent>
                 </UiCard>
+                <UiCard
+                  v-if="showDevRoleSwitcher"
+                  class="py-2 ml-1 mr-2 gap-2"
+                >
+                  <UiCardHeader>
+                    <UiCardTitle class="mx-auto text-lg">
+                      Dev Role Switcher
+                    </UiCardTitle>
+                  </UiCardHeader>
+                  <UiCardContent class="grid gap-3">
+                    <UiSelect
+                      v-model="devRoleSelectValue"
+                    >
+                      <UiSelectTrigger class="w-full">
+                        <UiSelectValue placeholder="Pick a role override" />
+                      </UiSelectTrigger>
+                      <UiSelectContent>
+                        <UiSelectGroup>
+                          <UiSelectItem value="__supabase__">
+                            Use Supabase role
+                          </UiSelectItem>
+                          <UiSelectItem
+                            v-for="roleOption in roleOptions"
+                            :key="roleOption.value"
+                            :value="roleOption.value"
+                          >
+                            {{ roleOption.label }}
+                          </UiSelectItem>
+                        </UiSelectGroup>
+                      </UiSelectContent>
+                    </UiSelect>
+                    <BaseButton
+                      variant="outline"
+                      size="sm"
+                      label="Clear Override"
+                      icon-name="material-symbols:restart-alt"
+                      @click="devRoleOverride = ''"
+                    />
+                  </UiCardContent>
+                </UiCard>
               </UiScrollArea>
             </UiSheetContent>
           </UiSheet>
@@ -208,10 +248,11 @@
 
 <script lang="ts" setup>
 import { navigationMenuTriggerStyle } from '#layers/shared/app/components/ui/navigation-menu'
-import { UpdatesPage } from '#layers/shared/shared/enums'
+import { getDashboardPath, type UserRole } from '#layers/shared/shared/roles'
 import { PopoverArrow, PopoverAnchor } from 'reka-ui'
 
 const user = useSupabaseUser()
+const role = useUserRole()
 const supabase = useSupabaseClient()
 const router = useRouter()
 
@@ -223,14 +264,28 @@ const handleLogout = async () => {
 const { isFullscreen, toggle: toggleFullscreen } = useFullscreen()
 
 const themeVariants = {
-  blue: 'hsl(217.2 91.2% 59.8%)',
-  slate: 'hsl(215.3 19.3% 34.5%)',
-  neutral: 'hsl(0 0% 32.2%)',
+  azure: '#2D7FF9',
+  teal: '#20C997',
+  violet: '#7C3AED',
 }
 
 const appSettings = useAppSettings()
 const publicRuntimeConfig = useRuntimeConfig().public
 const appVersion = publicRuntimeConfig.projectVersion
+const devRoleOverride = useDevRoleOverride()
+const showDevRoleSwitcher = import.meta.client && import.meta.dev
+const devRoleSelectValue = computed({
+  get: () => devRoleOverride.value || '__supabase__',
+  set: (value: string) => {
+    devRoleOverride.value = value === '__supabase__' ? '' : value
+  },
+})
+
+const roleOptions = [
+  { label: 'Super Admin', value: 'super_admin' },
+  { label: 'Test Centre Admin', value: 'test_centre_admin' },
+  { label: 'Student', value: 'student' },
+]
 
 const themeWriteableComputedRef = computed({
   get: () => appSettings.value.theme,
@@ -241,41 +296,67 @@ const colorMode = useColorMode<keyof typeof themeVariants>({
   attribute: 'data-theme-variant',
   modes: Object.fromEntries(Object.keys(themeVariants).map(v => [v, v])),
   storageRef: themeWriteableComputedRef,
-  initialValue: 'blue',
+  initialValue: 'azure',
 })
 
-const pdfCropperItem = {
+type NavItem = {
+  title: string
+  href: string
+  icon: string
+}
+
+const dashboardItem = computed<NavItem | null>(() => {
+  if (!role.value) return null
+  return {
+    title: 'Dashboard',
+    href: getDashboardPath(role.value as UserRole),
+    icon: 'material-symbols:dashboard-rounded',
+  }
+})
+
+const pdfCropperItem: NavItem = {
   title: 'PDF Cropper',
   href: '/pdf-cropper',
   icon: 'material-symbols:crop-rounded',
 }
 
-const cbtItems = [
-  {
-    title: 'Test Interface',
-    href: '/cbt/interface',
-    icon: 'line-md:computer',
-  },
-  {
-    title: 'Test Results',
-    href: '/cbt/results',
-    icon: 'material-symbols:bar-chart-4-bars-rounded',
-  },
-  {
-    title: 'Generate Answer Key',
-    href: '/cbt/generate-answer-key',
-    icon: 'mdi:script-text-key-outline',
-  },
-]
+const testInterfaceItem: NavItem = {
+  title: 'Test Interface',
+  href: '/cbt/interface',
+  icon: 'line-md:computer',
+}
 
-const menuItems = [
-  pdfCropperItem,
-  {
-    title: 'CBT',
-    icon: 'line-md:computer',
-    content: cbtItems,
-  },
-]
+const resultsItem: NavItem = {
+  title: 'Test Results',
+  href: '/cbt/results',
+  icon: 'material-symbols:bar-chart-4-bars-rounded',
+}
+
+const answerKeyItem: NavItem = {
+  title: 'Generate Answer Key',
+  href: '/cbt/generate-answer-key',
+  icon: 'mdi:script-text-key-outline',
+}
+
+const visibleNavItems = computed<NavItem[]>(() => {
+  if (!user.value || !role.value) return []
+
+  const items: NavItem[] = []
+  if (dashboardItem.value) items.push(dashboardItem.value)
+
+  if (role.value === 'student') {
+    items.push(testInterfaceItem, resultsItem)
+    return items
+  }
+
+  if (role.value === 'test_centre_admin') {
+    items.push(pdfCropperItem, testInterfaceItem, resultsItem, answerKeyItem)
+    return items
+  }
+
+  items.push(pdfCropperItem, testInterfaceItem, resultsItem, answerKeyItem)
+  return items
+})
 
 onMounted(() => {
   triggerRef(appSettings)

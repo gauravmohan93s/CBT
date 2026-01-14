@@ -7,7 +7,7 @@ export default () => {
     storageSettings = useLocalStorage<AppSettings>(
       LocalStorageKeys.AppSettings,
       {
-        theme: 'blue',
+        theme: 'azure',
         notify: {
           releases: {
             indicator: true,

@@ -12,8 +12,8 @@
         <p>This is a backup website.</p>
         <p>
           The main website is at
-          <NuxtLink to="https://pdf2cbt.vercel.app">
-            <strong>pdf2cbt.vercel.app</strong>.
+          <NuxtLink to="https://mockcbt.vercel.app">
+            <strong>mockcbt.vercel.app</strong>.
           </NuxtLink>
         </p>
         <p>It is recommended to use the main website unless it is unavailable.</p>
@@ -31,7 +31,7 @@
         </div>
         <div class="mt-4 flex flex-col gap-5 md:flex-row md:justify-between md:gap-8">
           <NuxtLink
-            to="https://pdf2cbt.vercel.app"
+            to="https://mockcbt.vercel.app"
             class="flex justify-center"
           >
             <BaseButton

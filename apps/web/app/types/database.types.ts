@@ -1,3 +1,4 @@
+/* eslint-disable @stylistic/operator-linebreak */
 export type Json =
   | string
   | number
@@ -14,18 +15,21 @@ export interface Database {
           id: string
           full_name: string | null
           avatar_url: string | null
+          role: string | null
           updated_at: string | null
         }
         Insert: {
           id: string
           full_name?: string | null
           avatar_url?: string | null
+          role?: string | null
           updated_at?: string | null
         }
         Update: {
           id?: string
           full_name?: string | null
           avatar_url?: string | null
+          role?: string | null
           updated_at?: string | null
         }
       }

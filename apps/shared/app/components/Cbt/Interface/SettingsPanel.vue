@@ -1707,7 +1707,7 @@ const processImportExport = (name: ImportExportTypeKey | string, data: Record<st
 
       const exportData = JSON.stringify(data, null, 2)
       const blob = new Blob([exportData], { type: 'application/json' })
-      utilSaveFile('pdf2cbt.settings.json', blob)
+      utilSaveFile('mockcbt.settings.json', blob)
       break
     }
     case 'restoreFromSaved': {
