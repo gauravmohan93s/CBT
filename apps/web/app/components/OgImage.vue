@@ -1,5 +1,6 @@
 <script setup lang="ts">
-  const title = 'MockCBT'const description = 'Turn PDF of questions into CBT (Computer Based Test).'
+const title = 'MockCBT'
+const description = 'Turn PDF of questions into CBT (Computer Based Test).'
 </script>
 
 <template>

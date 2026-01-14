@@ -5,13 +5,12 @@ const enableSeoModules = import.meta.env.DISABLE_SEO_MODULES === 'true' ? false 
 
 export default defineNuxtConfig({
   extends: ['../shared'],
-  pages: true,
-  srcDir: 'app',
   modules: ['@nuxtjs/robots', '@nuxtjs/sitemap', 'nuxt-og-image', '@nuxtjs/supabase'],
   $meta: {
     name: 'web',
     title: 'MockCBT',
   },
+  pages: true,
   css: ['~/assets/css/main.css'],
   site: {
     url: 'https://mockcbt.vercel.app',
@@ -23,6 +22,7 @@ export default defineNuxtConfig({
       projectVersion: packageJson.version,
     },
   },
+  srcDir: 'app',
   future: {
     compatibilityVersion: 4,
   },

@@ -152,11 +152,21 @@ function checkAndMigrateTestInterfaceMainLayoutSizeSettings() {
     })
 }
 
-onMounted(() => {
+onMounted(async () => {
   const _isBackupWebsite = useRuntimeConfig().public.isBackupWebsite as string | boolean
   const isBackupWebsite = _isBackupWebsite === 'true' || _isBackupWebsite === true
   if (isBackupWebsite && !localStorage.getItem(MiscConsts.BackupNoticeDismissedKey))
     showBackupWebsiteNotice.value = true
+
+  const { fetchBranding, branding } = useBranding()
+  await fetchBranding()
+
+  // Apply branding to CBT Interface settings
+  const { uiSettings } = useCbtSettings()
+  if (branding.value.primary_color) {
+    uiSettings.value.themes.primary.bgColor = branding.value.primary_color
+    uiSettings.value.themes.primary.textColor = '#FFFFFF' // Assume white text for now, or calc contrast
+  }
 
   checkAndMigrateThemeSettings()
   checkAndMigratePdfCropperSettings()

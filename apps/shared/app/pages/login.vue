@@ -7,9 +7,9 @@
         </h2>
         <p class="mt-2 text-sm text-muted-foreground">
           Or
-          <a href="#" class="font-medium text-primary hover:text-primary/80">
+          <NuxtLink to="/signup" class="font-medium text-primary hover:text-primary/80">
             start your free trial today
-          </a>
+          </NuxtLink>
         </p>
       </div>
       <form class="mt-8 space-y-6" @submit.prevent="handleLogin">

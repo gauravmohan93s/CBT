@@ -18,14 +18,32 @@
             <!-- Title for Test Results PagePanel -->
             <h1
               v-show="currentPanelName !== ResultsPagePanels.MyTests"
-              class="text-xl text-center flex flex-col sm:flex-row justify-center items-center"
+              class="text-xl text-center flex flex-col sm:flex-row justify-center items-center gap-4"
             >
-              <span>Showing Results for&nbsp;</span>
-              <ClientOnly>
-                <span class="font-bold">
-                  {{ computedTestName }}
-                </span>
-              </ClientOnly>
+              <div class="flex flex-col sm:flex-row items-center">
+                <span>Showing Results for&nbsp;</span>
+                <ClientOnly>
+                  <span class="font-bold">
+                    {{ computedTestName }}
+                  </span>
+                </ClientOnly>
+              </div>
+              <BaseButton
+                v-if="currentPanelName === ResultsPagePanels.Summary"
+                label="Download PDF Report"
+                size="sm"
+                icon-name="material-symbols:download"
+                class="bg-red-600 hover:bg-red-700 text-white"
+                @click="downloadPdfReport"
+              />
+              <BaseButton
+                v-if="currentPanelName === ResultsPagePanels.Summary"
+                label="Share Result"
+                size="sm"
+                variant="outline"
+                icon-name="material-symbols:share"
+                @click="sharePublicLink"
+              />
             </h1>
             <!-- Title for My Tests PagePanel -->
             <div
@@ -1176,6 +1194,26 @@ const renameCurrentTest = (newName: string) => {
 
   testResultJsonData.value.testConfig.testName = newName
   testResultJsonData.value.testResultOverview.testName = newName
+}
+
+const { generateReport } = usePdfReport()
+
+const downloadPdfReport = () => {
+  if (testResultJsonData.value) {
+    const user = useSupabaseUser()
+    const studentName = user.value?.user_metadata?.full_name || 'Student'
+    
+    // cast to TestInterfaceJsonOutput because the structure is compatible for report
+    generateReport(testResultJsonData.value as unknown as TestInterfaceJsonOutput, studentName)
+  }
+}
+
+const sharePublicLink = () => {
+  if (currentResultsID.value) {
+    const url = `${window.location.origin}/share/result?id=${currentResultsID.value}`
+    navigator.clipboard.writeText(url)
+    alert('Public result link copied to clipboard!\nYou can share this with your parents or teachers.')
+  }
 }
 
 function onMountedCallback(id: number | null = null) {

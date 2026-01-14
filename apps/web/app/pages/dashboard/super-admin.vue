@@ -29,52 +29,95 @@
 
       <div class="mt-8 grid gap-4 md:grid-cols-3">
         <div class="rounded-xl border bg-card p-5 shadow-sm">
-          <p class="text-sm text-muted-foreground">Active Centers</p>
-          <p class="mt-3 text-3xl font-semibold text-foreground">24</p>
-          <p class="mt-2 text-xs text-muted-foreground">+3 this week</p>
+          <p class="text-sm text-muted-foreground">
+            Active Centers
+          </p>
+          <p class="mt-3 text-3xl font-semibold text-foreground">
+            24
+          </p>
+          <p class="mt-2 text-xs text-muted-foreground">
+            +3 this week
+          </p>
         </div>
         <div class="rounded-xl border bg-card p-5 shadow-sm">
-          <p class="text-sm text-muted-foreground">Monthly Revenue</p>
-          <p class="mt-3 text-3xl font-semibold text-foreground">₹182,400</p>
-          <p class="mt-2 text-xs text-muted-foreground">Tier upgrades trending up</p>
+          <p class="text-sm text-muted-foreground">
+            Monthly Revenue
+          </p>
+          <p class="mt-3 text-3xl font-semibold text-foreground">
+            ₹182,400
+          </p>
+          <p class="mt-2 text-xs text-muted-foreground">
+            Tier upgrades trending up
+          </p>
         </div>
         <div class="rounded-xl border bg-card p-5 shadow-sm">
-          <p class="text-sm text-muted-foreground">Platform Health</p>
-          <p class="mt-3 text-3xl font-semibold text-foreground">99.9%</p>
-          <p class="mt-2 text-xs text-muted-foreground">Last incident 28 days ago</p>
+          <p class="text-sm text-muted-foreground">
+            Platform Health
+          </p>
+          <p class="mt-3 text-3xl font-semibold text-foreground">
+            99.9%
+          </p>
+          <p class="mt-2 text-xs text-muted-foreground">
+            Last incident 28 days ago
+          </p>
         </div>
       </div>
 
       <div class="mt-8 grid gap-6 lg:grid-cols-2">
         <div class="rounded-2xl border bg-card p-6 shadow-sm">
-          <h2 class="text-lg font-semibold text-foreground">Pending Actions</h2>
+          <h2 class="text-lg font-semibold text-foreground">
+            Pending Actions
+          </h2>
           <ul class="mt-4 space-y-3 text-sm text-muted-foreground">
             <li class="flex items-center justify-between rounded-lg border border-dashed p-3">
               Review new center onboarding requests
-              <BaseButton size="sm" label="Review" />
+              <BaseButton
+                size="sm"
+                label="Review"
+              />
             </li>
             <li class="flex items-center justify-between rounded-lg border border-dashed p-3">
               Approve enterprise tier quote
-              <BaseButton size="sm" label="Open" />
+              <BaseButton
+                size="sm"
+                label="Open"
+              />
             </li>
             <li class="flex items-center justify-between rounded-lg border border-dashed p-3">
               Update subscription limits for pilot customers
-              <BaseButton size="sm" label="Edit" />
+              <BaseButton
+                size="sm"
+                label="Edit"
+              />
             </li>
           </ul>
         </div>
         <div class="rounded-2xl border bg-card p-6 shadow-sm">
-          <h2 class="text-lg font-semibold text-foreground">Today’s Highlights</h2>
+          <h2 class="text-lg font-semibold text-foreground">
+            Today’s Highlights
+          </h2>
           <div class="mt-4 grid gap-4">
             <div class="rounded-xl bg-[linear-gradient(120deg,_#2d7ff9_0%,_#7c3aed_100%)] p-4 text-white">
-              <p class="text-xs uppercase tracking-wide text-white/80">Top Center</p>
-              <p class="mt-2 text-lg font-semibold">Brightline Institute</p>
-              <p class="mt-1 text-sm text-white/80">1,240 tests conducted this month</p>
+              <p class="text-xs uppercase tracking-wide text-white/80">
+                Top Center
+              </p>
+              <p class="mt-2 text-lg font-semibold">
+                Brightline Institute
+              </p>
+              <p class="mt-1 text-sm text-white/80">
+                1,240 tests conducted this month
+              </p>
             </div>
             <div class="rounded-xl bg-[linear-gradient(120deg,_#20c997_0%,_#22c55e_100%)] p-4 text-white">
-              <p class="text-xs uppercase tracking-wide text-white/80">Growth</p>
-              <p class="mt-2 text-lg font-semibold">+18% new student registrations</p>
-              <p class="mt-1 text-sm text-white/80">Highest since launch</p>
+              <p class="text-xs uppercase tracking-wide text-white/80">
+                Growth
+              </p>
+              <p class="mt-2 text-lg font-semibold">
+                +18% new student registrations
+              </p>
+              <p class="mt-1 text-sm text-white/80">
+                Highest since launch
+              </p>
             </div>
           </div>
         </div>

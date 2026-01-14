@@ -1062,8 +1062,8 @@
 
               const { pdfBuffer, jsonData, pdfFileHash } = hashMismatchDialogState
               if (pdfBuffer && jsonData) {
-                testState.testConfig.pdfFileHash = pdfFileHash || ''
-                loadTestData({ pdfBuffer, jsonData, testImageBlobs: null })
+                testState.value.testConfig.pdfFileHash = pdfFileHash || ''
+                emit('load-test-data', { pdfBuffer, jsonData, testImageBlobs: null })
               }
             }"
           />
@@ -1456,7 +1456,7 @@ const prepareTestState = shallowReactive({
 
 const testState = defineModel<TestState>('testState', { required: true })
 
-const emit = defineEmits(['prepareTest'])
+const emit = defineEmits(['prepareTest', 'load-test-data'])
 
 const db = useDB()
 
@@ -1758,12 +1758,12 @@ async function verifyTestData(
           if (currentPdfFileHash) {
             testState.value.testConfig.pdfFileHash = currentPdfFileHash
           }
-          loadTestData(uploadedData)
+          emit('load-test-data', uploadedData)
         }
       }
       else {
         testState.value.testConfig.pdfFileHash = pdfFileHashInJson || ''
-        loadTestData(uploadedData)
+        emit('load-test-data', uploadedData)
       }
     }
     else if (!jsonData && !pdfBuffer && !testImageBlobs) {
@@ -1781,191 +1781,13 @@ async function verifyTestData(
   }
 }
 
-async function loadTestData(
-  uploadedData: UploadedTestData,
-) {
-  try {
-    zipFileFromUrlState.zipFile = null
-    const { jsonData, pdfBuffer, testImageBlobs } = uploadedData
-    testState.value.pdfFile = pdfBuffer
-    testState.value.testImageBlobs = testImageBlobs
-
-    const newCropperSectionsData: CropperSectionsData = {}
-    let newTestSectionsData: TestSessionSectionsData = {}
-    let sectionsArray: TestSectionListItem[] = []
-
-    const isContinueLastTest = testState.value.continueLastTest
-
-    const {
-      pdfCropperData,
-      testAnswerKey,
-      testConfig,
-    } = jsonData as unknown as AnswerKeyJsonOutputBasedOnPdfCropper
-
-    if (!testState.value.testConfig.zipOriginalUrl)
-      testState.value.testConfig.zipOriginalUrl = testConfig?.zipOriginalUrl || (testConfig?.zipUrl || '')
-
-    if (testConfig.optionalQuestions?.length)
-      testState.value.testConfig.optionalQuestions = testConfig.optionalQuestions
-
-    if (testAnswerKey)
-      testState.value.testAnswerKey = testAnswerKey
-
-    if (!pdfCropperData)
-      throw new Error('Error, pdfCropperData not found in json data')
-
-    // for newCropperSectionsData and sectionsArray
-    for (const subject of Object.keys(pdfCropperData)) {
-      for (const section of Object.keys(pdfCropperData[subject]!)) {
-        newCropperSectionsData[section] = pdfCropperData[subject]![section]!
-
-        if (isContinueLastTest) continue // skip sectionsList as the one in db will be used
-
-        const sectionsItem: TestSectionListItem = {
-          name: section,
-          subject,
-          id: 0, // initial, proper id is being set later
-        }
-        sectionsArray.push(sectionsItem)
-      }
-    }
-
-    let totalQuestions = 0
-    let totalSections = 0
-
-    if (isContinueLastTest) {
-      try {
-        const testData = await db.getTestData()
-
-        totalQuestions = testData.totalQuestions
-        totalSections = testData.testSectionsList.length
-        sectionsArray = testData.testSectionsList
-        newTestSectionsData = testData.testSectionsData
-        currentTestState.value = testData.currentTestState
-
-        const testLogger = useCbtLogger()
-        testLogger.replaceLogsArray(testData.testLogs)
-      }
-      catch (e: unknown) {
-        useErrorToast('Error getting Test Data in db', e)
-        testState.value.continueLastTest = null
-      }
-    }
-    else {
-    // for newTestSectionsData
-      let sectionData: TestSessionSectionData = {}
-      const firstData: {
-        section: string | null
-        question: null | number
-      } = {
-        section: null,
-        question: null,
-      }
-
-      const sectionsPrevQuestion: Record<string, number> = {}
-      for (const section of Object.keys(newCropperSectionsData)) {
-        let firstQuestion: number | null = null
-
-        firstData.section ??= section
-        let secQueId = 1
-        for (const question of Object.keys(newCropperSectionsData[section]!)) {
-          const { que, type, answerOptions } = newCropperSectionsData[section]![question]!
-
-          firstQuestion ??= que
-          firstData.question ??= que
-
-          sectionData[question] = {
-            secQueId,
-            queId: totalQuestions,
-            que,
-            section,
-            type,
-            answer: null,
-            status: 'notVisited',
-            timeSpent: 0,
-          }
-
-          if (type === 'mcq' || type === 'msq' || type === 'msm')
-            sectionData[question].answerOptions = answerOptions || '4'
-
-          totalQuestions++
-          secQueId++
-        }
-
-        if (firstQuestion !== null) {
-          sectionsPrevQuestion[section] = firstQuestion
-        }
-        newTestSectionsData[section] = sectionData
-
-        sectionData = {}
-        totalSections++
-      }
-
-      currentTestState.value.sectionsPrevQuestion = sectionsPrevQuestion
-      currentTestState.value.section = firstData.section as string
-    }
-
-    testState.value.totalSections = totalSections
-    testState.value.totalQuestions = totalQuestions
-
-    sectionsArray.forEach((item, idx) => item.id = idx + 1)
-
-    testSectionsList.value.splice(0, testSectionsList.value.length, ...sectionsArray)
-    cropperSectionsData.value = newCropperSectionsData
-    testSectionsData.value = newTestSectionsData
-    updateTestQuestionsData(false)
-
-    useCreateSectionsSummary(testSectionsData, testSectionsSummary)
-
-    testState.value.isSectionsDataLoaded = true
-  }
-  catch (err) {
-    useErrorToast('Error loading TestData', err)
-  }
-}
-
-function updateTestQuestionsData(recalculateTotalQueId: boolean = true) {
-  const sectionsList = testSectionsList.value
-  const sectionsData = testSectionsData.value
-
-  testQuestionsData.value.clear()
-
-  let queId = 1
-  for (const sectionListItem of sectionsList) {
-    const sectionData = sectionsData[sectionListItem.name]
-    if (!sectionData) continue
-
-    for (const questionData of Object.values(sectionData)) {
-      if (recalculateTotalQueId) {
-        questionData.queId = queId
-        testQuestionsData.value.set(queId, questionData)
-        queId++
-      }
-      else {
-        queId = questionData.queId
-        testQuestionsData.value.set(queId, questionData)
-      }
-    }
-  }
-}
-
 function prepareTest() {
-  updateTestQuestionsData()
   emit('prepareTest')
 }
 
 const reloadPage = () => {
   window.location.reload()
 }
-
-watchDebounced(testSectionsList,
-  () => {
-    if (testState.value.isSectionsDataLoaded) {
-      updateTestQuestionsData()
-    }
-  },
-  { debounce: 750, maxWait: 5000, deep: true },
-)
 
 onMounted(() => {
   db.getSettings()

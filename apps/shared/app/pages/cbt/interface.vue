@@ -199,10 +199,24 @@
               {{ questionTimeSpentString }}
             </span>
           </div>
+          <div
+            v-if="testState.currentProcess === 'loading-cloud'"
+            class="flex m-auto flex-col items-center gap-4"
+          >
+            <Icon
+              name="line-md:loading-twotone-loop"
+              class="text-4xl text-primary"
+            />
+            <p class="text-xl font-semibold text-center">
+              Loading Test from Cloud...<br>
+              <span class="text-sm font-normal text-muted-foreground">Fetching question paper and configuration</span>
+            </p>
+          </div>
           <CbtInterfaceSettingsPanel
             v-if="testState.currentProcess === 'initial'"
             v-model:test-state="testState"
             @prepare-test="prepareTest"
+            @load-test-data="loadTestData"
           />
           <LazyGenerateTestImages
             v-else-if="testState.currentProcess === 'preparing-imgs'"
@@ -616,6 +630,8 @@ const questionPaperDialogState = shallowReactive({
 })
 
 const db = useDB()
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 
 // styles and css variables being used on page
 const pageCssVars = computed(() => {
@@ -691,7 +707,52 @@ const testState = reactive<TestState>({
   currentProcess: 'initial',
   preparingTestCurrentQuestion: 0,
   continueLastTest: false,
+  examId: null as string | null, // New field to track cloud-loaded test
 })
+
+async function loadTestFromCloud(examId: string) {
+  testState.currentProcess = 'loading-cloud'
+  testState.examId = examId
+
+  try {
+    const { data: exam, error } = await supabase
+      .from('exams')
+      .select('*')
+      .eq('id', examId)
+      .single()
+
+    if (error || !exam) throw new Error('Exam not found or access denied.')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const config = exam.configuration as any
+    const pdfUrl = config.testConfig?.pdfUrl
+
+    if (!pdfUrl) throw new Error('PDF URL not found in exam configuration.')
+
+    // Fetch PDF
+    const response = await fetch(pdfUrl)
+    if (!response.ok) throw new Error('Failed to download question paper PDF.')
+    const pdfBuffer = new Uint8Array(await response.arrayBuffer())
+
+    // Initialize test settings and state
+    testSettings.value.testName = exam.title
+    testSettings.value.durationInSeconds = config.testConfig?.testDurationInSeconds || 3600
+    
+    // Load test data using the existing function (mocking UploadedTestData)
+    await loadTestData({
+      pdfBuffer,
+      jsonData: config,
+      testImageBlobs: null
+    })
+
+    // Auto-prepare test after loading
+    prepareTest()
+
+  } catch (e: any) {
+    useErrorToast('Cloud Load Failed', e)
+    testState.currentProcess = 'initial'
+  }
+}
 
 const preparingTestProgressBar = computed(() => {
   const ratio = testState.preparingTestCurrentQuestion / testState.totalQuestions
@@ -969,6 +1030,173 @@ function saveCurrentAnswer(via: AnswerSavedViaType | 'clear') {
   return null
 }
 
+function updateTestQuestionsData(recalculateTotalQueId: boolean = true) {
+  const sectionsList = testSectionsList.value
+  const sectionsData = testSectionsData.value
+
+  testQuestionsData.value.clear()
+
+  let queId = 1
+  for (const sectionListItem of sectionsList) {
+    const sectionData = sectionsData[sectionListItem.name]
+    if (!sectionData) continue
+
+    for (const questionData of Object.values(sectionData)) {
+      if (recalculateTotalQueId) {
+        questionData.queId = queId
+        testQuestionsData.value.set(queId, questionData)
+        queId++
+      }
+      else {
+        queId = questionData.queId
+        testQuestionsData.value.set(queId, questionData)
+      }
+    }
+  }
+}
+
+async function loadTestData(
+  uploadedData: UploadedTestData,
+) {
+  try {
+    const { jsonData, pdfBuffer, testImageBlobs } = uploadedData
+    testState.pdfFile = pdfBuffer
+    testState.testImageBlobs = testImageBlobs
+
+    const newCropperSectionsData: CropperSectionsData = {}
+    let newTestSectionsData: TestSessionSectionsData = {}
+    let sectionsArray: TestSectionListItem[] = []
+
+    const isContinueLastTest = testState.continueLastTest
+
+    const {
+      pdfCropperData,
+      testAnswerKey,
+      testConfig,
+    } = jsonData as unknown as AnswerKeyJsonOutputBasedOnPdfCropper
+
+    if (!testState.testConfig.zipOriginalUrl)
+      testState.testConfig.zipOriginalUrl = testConfig?.zipOriginalUrl || (testConfig?.zipUrl || '')
+
+    if (testConfig.optionalQuestions?.length)
+      testState.testConfig.optionalQuestions = testConfig.optionalQuestions
+
+    if (testAnswerKey)
+      testState.testAnswerKey = testAnswerKey
+
+    if (!pdfCropperData)
+      throw new Error('Error, pdfCropperData not found in json data')
+
+    // for newCropperSectionsData and sectionsArray
+    for (const subject of Object.keys(pdfCropperData)) {
+      for (const section of Object.keys(pdfCropperData[subject]!)) {
+        newCropperSectionsData[section] = pdfCropperData[subject]![section]!
+
+        if (isContinueLastTest) continue // skip sectionsList as the one in db will be used
+
+        const sectionsItem: TestSectionListItem = {
+          name: section,
+          subject,
+          id: 0, // initial, proper id is being set later
+        }
+        sectionsArray.push(sectionsItem)
+      }
+    }
+
+    let totalQuestions = 0
+    let totalSections = 0
+
+    if (isContinueLastTest) {
+      try {
+        const testData = await db.getTestData()
+
+        totalQuestions = testData.totalQuestions
+        totalSections = testData.testSectionsList.length
+        sectionsArray = testData.testSectionsList
+        newTestSectionsData = testData.testSectionsData
+        currentTestState.value = testData.currentTestState
+
+        const testLogger = useCbtLogger()
+        testLogger.replaceLogsArray(testData.testLogs)
+      }
+      catch (e: unknown) {
+        useErrorToast('Error getting Test Data in db', e)
+        testState.continueLastTest = null
+      }
+    }
+    else {
+    // for newTestSectionsData
+      let sectionData: TestSessionSectionData = {}
+      const firstData: {
+        section: string | null
+        question: null | number
+      } = {
+        section: null,
+        question: null,
+      }
+
+      const sectionsPrevQuestion: Record<string, number> = {}
+      for (const section of Object.keys(newCropperSectionsData)) {
+        let firstQuestion: number | null = null
+
+        firstData.section ??= section
+        let secQueId = 1
+        for (const question of Object.keys(newCropperSectionsData[section]!)) {
+          const { que, type, answerOptions } = newCropperSectionsData[section]![question]!
+
+          firstQuestion ??= que
+          firstData.question ??= que
+
+          sectionData[question] = {
+            secQueId,
+            queId: totalQuestions,
+            que,
+            section,
+            type,
+            answer: null,
+            status: 'notVisited',
+            timeSpent: 0,
+          }
+
+          if (type === 'mcq' || type === 'msq' || type === 'msm')
+            sectionData[question].answerOptions = answerOptions || '4'
+
+          totalQuestions++
+          secQueId++
+        }
+
+        if (firstQuestion !== null) {
+          sectionsPrevQuestion[section] = firstQuestion
+        }
+        newTestSectionsData[section] = sectionData
+
+        sectionData = {}
+        totalSections++
+      }
+
+      currentTestState.value.sectionsPrevQuestion = sectionsPrevQuestion
+      currentTestState.value.section = firstData.section as string
+    }
+
+    testState.totalSections = totalSections
+    testState.totalQuestions = totalQuestions
+
+    sectionsArray.forEach((item, idx) => item.id = idx + 1)
+
+    testSectionsList.value.splice(0, testSectionsList.value.length, ...sectionsArray)
+    cropperSectionsData.value = newCropperSectionsData
+    testSectionsData.value = newTestSectionsData
+    updateTestQuestionsData(false)
+
+    useCreateSectionsSummary(testSectionsData, testSectionsSummary)
+
+    testState.isSectionsDataLoaded = true
+  }
+  catch (err) {
+    useErrorToast('Error loading TestData', err)
+  }
+}
+
 function startTest() {
   const testDuration = currentTestState.value.remainingSeconds ?? testSettings.value.durationInSeconds
 
@@ -992,6 +1220,7 @@ function startTest() {
 }
 
 async function prepareTest() {
+  updateTestQuestionsData()
   testState.currentProcess = 'preparing-data'
   const continueFromBackup = testState.continueLastTest
 
@@ -1151,6 +1380,29 @@ async function submitTest(isAuto: boolean) {
   try {
     const id = await db.addTestOutputData(utilCloneJson(testOutputData!))
     if (id) {
+      // Sync to Supabase if it was a cloud-loaded test
+      if (testState.examId && user.value) {
+        try {
+          const { error: syncError } = await supabase
+            .from('results')
+            .insert({
+              exam_id: testState.examId,
+              student_id: user.value.id,
+              total_score: testOutputData.testResultOverview.totalMarks,
+              max_score: testOutputData.testResultOverview.totalMaxMarks,
+              percentage: testOutputData.testResultOverview.percentage,
+              data: testOutputData, // Store full JSON for deep analysis later
+              status: 'completed',
+              started_at: new Date(Date.now() - (testSettings.value.durationInSeconds - (currentTestState.value.remainingSeconds || 0)) * 1000).toISOString(),
+              submitted_at: new Date().toISOString()
+            })
+          
+          if (syncError) console.error('Supabase sync failed:', syncError)
+        } catch (e) {
+          console.error('Supabase sync error:', e)
+        }
+      }
+
       const currentResultsID = useCbtResultsCurrentID()
       currentResultsID.value = id
       submitState.isSubmitted = true
@@ -1283,6 +1535,23 @@ const downloadTestData = () => {
 }
 
 onBeforeUnmount(pageCleanUpCallback)
+
+watchDebounced(testSectionsList,
+  () => {
+    if (testState.isSectionsDataLoaded) {
+      updateTestQuestionsData()
+    }
+  },
+  { debounce: 750, maxWait: 5000, deep: true },
+)
+
+onMounted(() => {
+  const route = useRoute()
+  const examId = route.query.examId as string
+  if (examId) {
+    loadTestFromCloud(examId)
+  }
+})
 
 onUnmounted(() => {
   const keys = Object.values(CbtUseState)

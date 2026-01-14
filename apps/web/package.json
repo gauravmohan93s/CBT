@@ -37,6 +37,8 @@
     "dexie": "4.2.1",
     "echarts": "6.0.0",
     "fflate": "0.8.2",
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.7",
     "lucide-vue-next": "0.562.0",
     "markdown-it": "14.1.0",
     "markdown-it-attrs": "4.2.0",

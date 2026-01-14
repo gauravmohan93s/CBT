@@ -123,16 +123,24 @@
                 @load-pdf-pattern-mode-data="loadPdfPatternModeData"
               />
             </div>
-            <BaseButton
-              class="my-3.5 shrink-0"
-              icon-name="mdi:rocket-launch"
-              label="Generate Output"
-              :disabled="!hasQuestionsData"
-              @click="() => {
-                generateOutputState.downloaded = false
-                dialogsState.showGenerateOutput = true
-              }"
-            />
+            <div class="flex gap-2 my-3.5 shrink-0 w-full justify-center">
+              <BaseButton
+                icon-name="mdi:rocket-launch"
+                label="Generate Output"
+                :disabled="!hasQuestionsData"
+                @click="() => {
+                  generateOutputState.downloaded = false
+                  dialogsState.showGenerateOutput = true
+                }"
+              />
+              <BaseButton
+                class="bg-purple-600 hover:bg-purple-700 text-white"
+                icon-name="material-symbols:cloud-upload"
+                label="Publish to Cloud"
+                :disabled="!hasQuestionsData"
+                @click="publishState.showDialog = true"
+              />
+            </div>
             <PdfCropperQuestionDetailsPanel
               v-show="!cropperMode.isPattern"
               v-model="currentQuestionData"
@@ -465,6 +473,31 @@
         </UiScrollArea>
       </UiDialogContent>
     </LazyUiDialog>
+    <UiDialog v-model:open="publishState.showDialog">
+      <UiDialogContent>
+        <UiDialogHeader>
+          <UiDialogTitle>Publish Test to Cloud</UiDialogTitle>
+        </UiDialogHeader>
+        <div class="flex flex-col gap-4 py-4">
+          <div class="flex flex-col gap-2">
+            <UiLabel for="exam-title">Exam Title</UiLabel>
+            <UiInput id="exam-title" v-model="publishState.title" placeholder="e.g. JEE Mains Mock 1" />
+          </div>
+          <div class="flex flex-col gap-2">
+            <UiLabel for="exam-desc">Description</UiLabel>
+            <UiTextarea id="exam-desc" v-model="publishState.description" placeholder="Optional details..." />
+          </div>
+          
+          <div v-if="publishState.publishing" class="text-sm text-center text-primary animate-pulse">
+            {{ publishState.progress }}
+          </div>
+        </div>
+        <div class="flex justify-end gap-2">
+          <BaseButton variant="ghost" label="Cancel" @click="publishState.showDialog = false" :disabled="publishState.publishing" />
+          <BaseButton label="Publish" @click="publishToCloud" :disabled="publishState.publishing || !publishState.title" />
+        </div>
+      </UiDialogContent>
+    </UiDialog>
     <LazyPdfCropperBulkEditDialog
       v-if="isPdfLoaded"
       v-model="dialogsState.showBulkEdit"
@@ -959,6 +992,89 @@ async function loadPdfPatternModeData(
   if (!mupdfWorker) return
 
   patternModeSidePanelElem.value?.runCropper(await mupdfWorker.getPdfPatternData(pageNums, options))
+}
+
+const publishState = shallowReactive({
+  showDialog: false,
+  title: '',
+  description: '',
+  publishing: false,
+  progress: '',
+})
+
+async function publishToCloud() {
+  if (!pdfState.fileUint8Array) return
+  if (!publishState.title) return
+  
+  const supabase = useSupabaseClient()
+  const user = useSupabaseUser()
+  
+  publishState.publishing = true
+  publishState.progress = 'Finding organization...'
+  
+  try {
+    if (!user.value) throw new Error('Not authenticated')
+
+    // 1. Get Organization ID
+    const { data: memberData, error: memberError } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.value.id)
+      .single()
+      
+    if (memberError || !memberData) throw new Error('You must belong to an organization to publish.')
+    
+    const orgId = memberData.organization_id
+    
+    // 2. Upload PDF
+    publishState.progress = 'Uploading PDF...'
+    const pdfPath = `${orgId}/${crypto.randomUUID()}.pdf`
+    const { error: uploadError } = await supabase.storage
+      .from('exams')
+      .upload(pdfPath, pdfState.fileUint8Array, {
+        contentType: 'application/pdf',
+        upsert: false
+      })
+      
+    if (uploadError) throw uploadError
+    
+    const pdfUrl = supabase.storage.from('exams').getPublicUrl(pdfPath).data.publicUrl
+    
+    // 3. Prepare JSON Configuration
+    publishState.progress = 'Saving Exam Data...'
+    const jsonData = transformDataToOutputFormat(toRaw(cropperOverlayDatas))
+    
+    // Add PDF URL to config (cast to any to avoid strict type check for now)
+    ;(jsonData.testConfig as any).pdfUrl = pdfUrl
+    
+    // 4. Insert Exam
+    const { error: insertError } = await supabase
+      .from('exams')
+      .insert({
+        organization_id: orgId,
+        title: publishState.title,
+        description: publishState.description,
+        status: 'published',
+        configuration: jsonData,
+        created_by: user.value.id
+      })
+      
+    if (insertError) throw insertError
+    
+    // Success feedback using Sonner (via useToast? or just window.alert for now if useToast not auto-imported)
+    // The component uses <Toaster> so useToast from vue-sonner should work? 
+    // apps/web/app/app.vue imports Toaster.
+    // I'll try simple alert or console.log if I'm unsure about auto-import. 
+    // Actually, useErrorToast is imported/available. I'll stick to that style or basic alert.
+    alert('Exam published successfully!')
+    publishState.showDialog = false
+    publishState.title = ''
+    
+  } catch (e: any) {
+    useErrorToast('Publish failed', e)
+  } finally {
+    publishState.publishing = false
+  }
 }
 
 async function handlePdfFileUpload(file: File | Uint8Array) {

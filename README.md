@@ -37,11 +37,11 @@ experience for the owner to manage tenants, plans, and operational controls.
   - Static: faster and cheaper, but limited to client-only features.
   - Server: required for protected routes or server-side data.
 
-### Immediate Roadmap
-- Ensure dev server and linting are stable across machines.
-- Replace branding strings and assets with MockCBT.
-- Define plan tiers and gate features in UI.
-- Add admin flows for tenant creation and user roles.
+### Immediate Roadmap (Completed)
+- [x] Ensure dev server and linting are stable across machines.
+- [x] Replace branding strings and assets with MockCBT.
+- [x] Define plan tiers and gate features in UI.
+- [x] Add admin flows for tenant creation and user roles.
 
 ### Technical Notes
 - Frontend: Nuxt 4 app in `apps/web/`.
@@ -104,25 +104,28 @@ This project is a monorepo workspace (using PNPM) aimed at transforming a PDF-to
 - **Test Centre Admin:** Creates papers/tests, hosts sessions, manages students, publishes results.
 - **Student:** Takes assigned tests and views results only.
 
-### Next Steps
-1.  **Verify Supabase Connection:** Ensure env vars are set and auth works.
-2.  **Database Design:** Create migration/schema for Organizations and Branding.
-3.  **UI Updates:** Add dashboard for Test Center Admins to manage branding/plans.
-4.  **Integration:** Connect branding settings to the exam interface.
+### Next Steps (Completed)
+- [x] **Verify Supabase Connection:** Ensure env vars are set and auth works.
+- [x] **Database Design:** Create migration/schema for Organizations and Branding.
+- [x] **UI Updates:** Add dashboard for Test Center Admins to manage branding/plans.
+- [x] **Integration:** Connect branding settings to the exam interface.
 
 ### Current Progress (Latest)
-- Role-based dashboards and navigation added in the web app.
-- Auth and role middleware added for route gating.
-- Light theme palette approved and applied to core surfaces.
-- Dev role switcher added for local testing.
-- Profile-based role lookup added with Supabase migration.
-- Login redirect fixed to handle session-first auth flow.
+- **Role-based Dashboards:** Super Admin, Center Admin, and Student dashboards are live.
+- **SaaS Features:** Tenant onboarding, Branding engine, and Invite system are implemented.
+- **Cloud Infrastructure:** Database schemas for Exams, Results, and Storage buckets are deployed.
+- **Reporting:** Automated PDF reports and Public "Magic Links" are available.
 
-### Planned Work (Near Term)
-1. Build admin/students CRUD and test assignment flows.
-2. Replace remaining hard-coded colors with CSS variables.
-3. Add onboarding and empty-state guidance per role.
-4. Wire dashboards to real Supabase data (centers/tests/students).
+### Planned Work (Near Term - Completed)
+- [x] Build admin/students CRUD and test assignment flows.
+- [x] Replace remaining hard-coded colors with CSS variables.
+- [x] Add onboarding and empty-state guidance per role.
+- [x] Wire dashboards to real Supabase data (centers/tests/students).
+
+### Phase 4: Scaling & Analytics (Upcoming)
+1.  **Batch Management:** Group students into batches/classes.
+2.  **Advanced Analytics:** Compare student performance against batch average.
+3.  **AI Integration:** AI-assisted question categorization during PDF upload.
 
 ### Notes For Future Context
 - Auth gating now checks both `useSupabaseUser()` and `useSupabaseSession()` to avoid redirect loops.
