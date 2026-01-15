@@ -70,8 +70,16 @@ Your Super-Admin dashboard must track these metrics to ensure profitability:
 To stay ahead of competitors (like Testportal or ClassMarker), the following enhancements are recommended:
 
 * **Offline-First Resilience:** Further optimize Dexie to allow tests to continue even with 100% internet outage, syncing only when the connection returns.  
-* **Mobile App Access:** Offer a dedicated Android/iOS app as a premium feature for the Enterprise tier.  
+* **Mobile App Access:** Offer a dedicated Android/iOS app as a premium feature for the Enterprise tier.
 * **AI Question Categorization:** Use AI to automatically tag the difficulty level of questions extracted from PDFs.
+
+## ---
+
+**6\. Quality & Testing**
+
+* **Automated Smoke Tests:** Playwright smoke coverage for login/signup pages to catch auth UI regressions early.
+* **Manual Validation:** Continue using the end-to-end scenarios in `TESTING_GUIDE.md` for data-backed flows.
+* **Security Hardening:** Use RPC-backed invite validation and membership creation to avoid RLS bypasses.
 
 igh-growth SaaS platform.
 
@@ -147,4 +155,3 @@ I have analyzed existing solutions (like *Testportal*, *SpeedExam*, and *ClassMa
 2. **Parent/Guardian Portal:** Add a 4th role where parents can log in to see the "Automated Reports" 24 for their child. This increases "stickiness" as the tuition center now provides value directly to the fee-paying parents.  
 3. **WhatsApp Integration:** Instead of just emails, use Supabase Edge Functions to send test results directly to parents via WhatsApp. This is a high-value feature in markets like India.  
 4. **AI-Driven PDF Parsing:** Move beyond basic MuPDF extraction25. Use LLMs to automatically categorize question difficulty levels during the PDF upload process, saving teachers hours of tagging work.
-

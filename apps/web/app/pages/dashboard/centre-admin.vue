@@ -18,6 +18,7 @@
             class="bg-primary text-primary-foreground hover:bg-primary/90"
             label="Create Test"
             icon-name="material-symbols:playlist-add"
+            @click="goToPdfCropper"
           />
           <BaseButton
             variant="outline"
@@ -104,12 +105,25 @@
             Quick Actions
           </h2>
           <div class="mt-4 grid gap-3">
-            <button class="flex items-center justify-between rounded-lg border border-dashed p-3 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground">
+            <button
+              class="flex items-center justify-between rounded-lg border border-dashed p-3 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground"
+              @click="goToPdfCropper"
+            >
               Upload PDF and generate CBT package
               <Icon name="material-symbols:arrow-right-alt" />
             </button>
-            <button class="flex items-center justify-between rounded-lg border border-dashed p-3 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground">
+            <button
+              class="flex items-center justify-between rounded-lg border border-dashed p-3 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground"
+              @click="goToResults"
+            >
               Publish results for completed tests
+              <Icon name="material-symbols:arrow-right-alt" />
+            </button>
+            <button
+              class="flex items-center justify-between rounded-lg border border-dashed p-3 text-sm text-muted-foreground transition hover:border-primary hover:text-foreground"
+              @click="goToAnswerKey"
+            >
+              Generate answer keys for tests
               <Icon name="material-symbols:arrow-right-alt" />
             </button>
             <NuxtLink
@@ -203,6 +217,18 @@ const copyLink = (examId: string) => {
   // For now just copy ID
   navigator.clipboard.writeText(examId)
   alert('Exam ID copied: ' + examId)
+}
+
+const goToPdfCropper = () => {
+  navigateTo('/pdf-cropper')
+}
+
+const goToResults = () => {
+  navigateTo('/cbt/results')
+}
+
+const goToAnswerKey = () => {
+  navigateTo('/cbt/generate-answer-key')
 }
 
 const inviteState = reactive({

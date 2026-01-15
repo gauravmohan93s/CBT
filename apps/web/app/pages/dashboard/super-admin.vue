@@ -18,11 +18,13 @@
             class="bg-primary text-primary-foreground hover:bg-primary/90"
             label="Create Center"
             icon-name="material-symbols:add-circle-outline"
+            @click="goToSignup"
           />
           <BaseButton
             variant="outline"
             label="Billing"
             icon-name="material-symbols:credit-card"
+            @click="goToBilling"
           />
         </div>
       </div>
@@ -127,6 +129,14 @@
 </template>
 
 <script setup lang="ts">
+const goToSignup = () => {
+  navigateTo('/signup')
+}
+
+const goToBilling = () => {
+  navigateTo('/dashboard/billing')
+}
+
 definePageMeta({
   roles: ['super_admin'],
 })

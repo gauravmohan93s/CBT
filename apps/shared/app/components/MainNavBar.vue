@@ -44,8 +44,8 @@
         
         <div class="flex gap-2.5 sm:gap-3 xl:gap-4 items-center h-14 ml-auto min-[43rem]:ml-2 pr-4 xl:pr-8">
           
-          <template v-if="user">
-             <BaseButton
+          <template v-if="hasAuth">
+            <BaseButton
               variant="outline"
               size="sm"
               class="gap-2"
@@ -76,7 +76,7 @@
             icon-size="1.5rem"
             @click="toggleFullscreen()"
           />
-          <UiSheet>
+          <UiSheet v-if="showSettingsPanel">
             <UiSheetTrigger as-child>
               <div class="contents">
                 <BaseButton
@@ -91,7 +91,6 @@
                   size="icon"
                   title="Menu"
                   class="hidden min-[43rem]:flex"
-
                   icon-name="line-md:cog"
                 />
               </div>
@@ -141,7 +140,7 @@
                     </UiSheetClose>
                   </li>
                 </ul>
-                
+
                 <UiCard class="my-2 py-2 ml-1 mr-2 gap-2">
                   <UiCardHeader>
                     <UiCardTitle class="mx-auto text-lg">
@@ -252,9 +251,11 @@ import { getDashboardPath, type UserRole } from '#layers/shared/shared/roles'
 import { PopoverArrow, PopoverAnchor } from 'reka-ui'
 
 const user = useSupabaseUser()
+const session = useSupabaseSession()
 const role = useUserRole()
 const supabase = useSupabaseClient()
 const router = useRouter()
+const route = useRoute()
 
 const handleLogout = async () => {
   await supabase.auth.signOut()
@@ -273,7 +274,15 @@ const appSettings = useAppSettings()
 const publicRuntimeConfig = useRuntimeConfig().public
 const appVersion = publicRuntimeConfig.projectVersion
 const devRoleOverride = useDevRoleOverride()
+const publicPaths = ['/login', '/signup', '/join', '/share/result']
+const isPublicRoute = computed(() => {
+  const normalizedPath = route.path.startsWith('/') ? route.path : `/${route.path}`
+  return publicPaths.some(path => normalizedPath === path || normalizedPath.startsWith(`${path}/`))
+})
+
+const hasAuth = computed(() => Boolean(user.value || session.value?.user))
 const showDevRoleSwitcher = import.meta.client && import.meta.dev
+const showSettingsPanel = computed(() => import.meta.client && import.meta.dev && hasAuth.value && !isPublicRoute.value)
 const devRoleSelectValue = computed({
   get: () => devRoleOverride.value || '__supabase__',
   set: (value: string) => {
@@ -339,7 +348,7 @@ const answerKeyItem: NavItem = {
 }
 
 const visibleNavItems = computed<NavItem[]>(() => {
-  if (!user.value || !role.value) return []
+  if (!hasAuth.value || !role.value) return []
 
   const items: NavItem[] = []
   if (dashboardItem.value) items.push(dashboardItem.value)

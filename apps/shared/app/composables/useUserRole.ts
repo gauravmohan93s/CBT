@@ -17,6 +17,7 @@ export default () => {
 
     if (metadataRole) return metadataRole
     if (appRole) return appRole
+    if (user.value && !profileRole.loaded.value) return null
     if (user.value) return DEFAULT_ROLE
 
     return null

@@ -14,8 +14,8 @@ const user = useSupabaseUser()
 const role = useUserRole()
 
 watchEffect(() => {
-  if (user.value) {
-    navigateTo(getDashboardPath(role.value ?? DEFAULT_ROLE))
+  if (user.value && role.value) {
+    navigateTo(getDashboardPath(role.value))
   }
 })
 </script>

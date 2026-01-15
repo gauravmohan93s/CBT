@@ -129,6 +129,7 @@ This project is a monorepo workspace (using PNPM) aimed at transforming a PDF-to
 
 ### Notes For Future Context
 - Auth gating now checks both `useSupabaseUser()` and `useSupabaseSession()` to avoid redirect loops.
+- Supabase auto-redirect is disabled; `apps/web/app/middleware/auth.global.ts` controls public vs protected routes.
 - Use `/dashboard` as the default post-login route; it resolves to the role dashboard.
 
 ---
@@ -149,7 +150,14 @@ This project is a monorepo workspace (using PNPM) aimed at transforming a PDF-to
 - `pnpm --filter ./apps/web generate`: generate the static site output.
 - `pnpm --filter ./apps/web preview`: preview the production build locally.
 - `pnpm --filter ./apps/web lint`: run ESLint on the web app.
+- `pnpm test:e2e`: run Playwright smoke tests for the web app.
 - `pnpm --filter ./apps/shared prepare`: generate Nuxt types for shared app code.
+
+### CI Pipeline
+- GitHub Actions workflow in `.github/workflows/ci.yml` runs lint, typecheck, and Playwright smoke tests on pushes and PRs.
+
+### Production Checklist
+- Use `DEPLOYMENT_CHECKLIST.md` before every production release.
 
 ### Coding Style & Naming Conventions
 - Language: TypeScript + Vue SFCs (`.vue`) with Nuxt conventions.
@@ -158,8 +166,9 @@ This project is a monorepo workspace (using PNPM) aimed at transforming a PDF-to
 - Linting: ESLint configured in `apps/web/eslint.config.mjs` and `apps/shared/eslint.config.mjs`.
 
 ### Testing Guidelines
-- No automated test framework is configured yet.
-- If you add tests, keep files next to the code or under a `tests/` folder and document the runner in this guide.
+- Playwright smoke tests live in `apps/web/tests` and cover public auth pages.
+- Run `pnpm test:e2e` from the repo root (or `pnpm --filter ./apps/web test:e2e`).
+- Keep new tests next to the code they validate or under a `tests/` folder and document the runner here.
 
 ### Commit & Pull Request Guidelines
 - Commit messages are short, sentence-case summaries (e.g., “Add Supabase integration...”).
@@ -224,6 +233,9 @@ This stores a local override in the browser and never affects production.
 
 This project uses [Supabase](https://supabase.com) for Authentication, Database, and Realtime features.
 
+### Migration Workflow
+- Follow SUPABASE_WORKFLOW.md for clean migration practices across environments.
+
 ### Setup Instructions
 
 #### 1. Create a Supabase Project
@@ -261,3 +273,11 @@ npx supabase gen types typescript --project-id "your-project-id" --schema public
 - **profiles**: User profiles linked to Auth.
 - **organizations**: Test centers/tenants.
 - **organization_members**: Users belonging to organizations (with roles).
+- **organization_invites**: Invite tokens for onboarding (validated via RPC).
+
+### Staging + Preview Environments
+- **Supabase Staging:** Create a separate Supabase project for staging and apply the same migrations.
+- **Vercel Preview:** Set Preview environment variables in Vercel:
+  - `SUPABASE_URL` and `SUPABASE_KEY` for the staging Supabase project.
+  - `NUXT_PUBLIC_SITE_URL` set to the Vercel preview URL.
+- **Production:** Keep production Supabase credentials in the Production env scope and set `NUXT_PUBLIC_SITE_URL` to the live domain.

@@ -14,6 +14,13 @@
   "scripts": {
     "prepare": "pnpm --filter ./apps/shared prepare",
     "dev:web": "pnpm --dir apps/web exec nuxi dev --host 0.0.0.0 --port 3000",
+    "test:e2e": "pnpm --filter ./apps/web test:e2e",
+    "supabase:login": "supabase login",
+    "supabase:link": "supabase link",
+    "supabase:push": "supabase db push",
+    "supabase:start": "supabase start",
+    "supabase:reset": "supabase db reset",
+    "supabase:stop": "supabase stop",
     "generate:web": "pnpm --filter ./apps/web generate",
     "prepare:web": "pnpm --filter ./apps/web prepare"
   },

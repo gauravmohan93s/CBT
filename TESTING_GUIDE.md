@@ -8,6 +8,17 @@ This guide walks you through verifying the newly developed SaaS features (Onboar
 
 ---
 
+## Automated Smoke Test (Playwright)
+
+**Goal:** Verify the public auth pages render without regressions.
+
+1.  Ensure `SUPABASE_URL` and `SUPABASE_KEY` are set in `apps/web/.env`.
+2.  From the repo root, run: `pnpm test:e2e`.
+3.  Verify the Playwright run completes with a passing `smoke.spec.ts`.
+4.  If the web server times out, start it manually with `pnpm dev:web` and re-run with `PLAYWRIGHT_NO_WEB_SERVER=1 pnpm test:e2e`.
+
+---
+
 ## Test Scenario 1: Tenant Onboarding (The "Center Admin")
 
 **Goal:** Verify a new user can sign up and automatically provision an Organization.

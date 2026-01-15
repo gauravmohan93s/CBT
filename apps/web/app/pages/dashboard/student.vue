@@ -17,6 +17,8 @@
           class="bg-primary text-primary-foreground hover:bg-primary/90"
           label="Start Next Test"
           icon-name="material-symbols:play-circle-outline"
+          :disabled="availableExams.length === 0"
+          @click="startNextTest"
         />
       </div>
 
@@ -231,6 +233,12 @@ onMounted(async () => {
 
 const startExam = (examId: string) => {
   navigateTo(`/cbt/interface?examId=${examId}`)
+}
+
+const startNextTest = () => {
+  const nextExam = availableExams.value[0]
+  if (!nextExam) return
+  startExam(nextExam.id)
 }
 
 definePageMeta({

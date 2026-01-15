@@ -22,6 +22,9 @@ export default defineNuxtConfig({
       projectVersion: packageJson.version,
     },
   },
+  supabase: {
+    redirect: false,
+  },
   srcDir: 'app',
   future: {
     compatibilityVersion: 4,

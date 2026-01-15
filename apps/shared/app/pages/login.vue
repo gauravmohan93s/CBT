@@ -79,8 +79,8 @@ const errorMsg = ref('')
 const successMsg = ref('')
 
 watchEffect(() => {
-  if (user.value) {
-    router.push(getDashboardPath(role.value ?? DEFAULT_ROLE))
+  if (user.value && role.value) {
+    router.push(getDashboardPath(role.value))
   }
 })
 

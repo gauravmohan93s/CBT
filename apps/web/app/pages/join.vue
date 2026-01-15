@@ -132,18 +132,19 @@ onMounted(async () => {
     return
   }
 
-  // Verify Invite Token
-  const { data, error } = await supabase
-    .from('organization_invites')
-    .select('*, organizations(name)')
-    .eq('token', token)
-    .single()
+  const { data, error } = await supabase.rpc('get_invite_by_token', {
+    invite_token: token,
+  })
 
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     inviteError.value = true
   }
   else {
-    org.value = data.organizations
+    org.value = {
+      id: data[0].organization_id,
+      name: data[0].organization_name,
+      role: data[0].role,
+    }
   }
 })
 
@@ -167,32 +168,17 @@ const handleJoin = async () => {
     if (authError) throw authError
     if (!authData.user) throw new Error('Registration failed.')
 
-    // 2. Add to organization
-    // Fetch org_id from invite table using token again to be sure
-    const { data: inviteData } = await supabase
-      .from('organization_invites')
-      .select('organization_id')
-      .eq('token', token)
-      .single()
+    if (authData.session) {
+      const { error: joinError } = await supabase.rpc('join_organization_with_invite', {
+        invite_token: token,
+      })
 
-    if (inviteData && authData.session) {
-      const { error: memberError } = await supabase
-        .from('organization_members')
-        .insert({
-          organization_id: inviteData.organization_id,
-          user_id: authData.user.id,
-          role: 'member', // Use 'member' enum from org_members table
-        })
-
-      if (memberError) console.error('Member joining failed:', memberError)
-
-      // Update invite uses count (optional but good practice)
-      await supabase.rpc('increment_invite_uses', { invite_token: token })
+      if (joinError) throw joinError
 
       router.push('/dashboard/student')
     }
     else {
-      errorMsg.value = 'Please check your email to verify your account.'
+      errorMsg.value = 'Please check your email to verify your account.'        
     }
   }
   catch (e: unknown) {

@@ -15,6 +15,7 @@
     "prepare": "nuxt prepare",
     "generate": "nuxt generate",
     "lint": "eslint .",
+    "test:e2e": "playwright test",
     "preview": "nuxt preview"
   },
   "dependencies": {
@@ -67,6 +68,7 @@
     "vue-sonner": "2.0.9"
   },
   "devDependencies": {
+    "@playwright/test": "1.55.0",
     "@iconify-json/line-md": "1.2.13",
     "@iconify-json/material-symbols": "1.2.51",
     "@iconify-json/mdi": "1.2.3",

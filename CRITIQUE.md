@@ -58,13 +58,16 @@ The current **MockCBT** codebase is a robust "Utility Tool" (PDF to CBT converte
 4.  **Invite System (COMPLETED):** Tenants can generate unique registration links for students.
 
 ### Phase 4: Scaling & Analytics (NEXT)
-1.  **Advanced Analytics:** Batch-wise performance comparisons.
-2.  **AI Integration:** Categorizing PDF questions by difficulty.
+1.  **QA Automation (COMPLETED - Baseline):** Playwright smoke tests cover the public login/signup surfaces.
+2.  **Public Route Access (COMPLETED):** Disabled Supabase auto-redirect to keep `/signup`, `/join`, and shared results accessible.
+3.  **RLS Hardening (COMPLETED):** Invite validation and org membership now require secure RPC-backed flows.
+4.  **Advanced Analytics:** Batch-wise performance comparisons.
+5.  **AI Integration:** Categorizing PDF questions by difficulty.
 
 ---
 
 ## 4. Immediate Next Step
-**Start Development:** Implement **Phase 1: Signup & Organization Provisioning**.
-*   **Task:** Create `apps/web/app/pages/signup.vue`.
-*   **Task:** Connect it to `apps/shared/app/pages/login.vue`.
-*   **Task:** Handle post-signup logic (create Organization).
+**Start Development:** Implement **Phase 4: Batch Management & Analytics**.
+*   **Task:** Add batch/class entities and assign students to batches.
+*   **Task:** Surface batch-level performance comparisons in dashboards.
+*   **Task:** Expand Playwright smoke tests into authenticated, data-backed flows.
