@@ -39,8 +39,8 @@ export default defineNuxtConfig({
   icon: {
     clientBundle: {
       scan: {
-        globInclude: ['../shared/**/*.vue', '../web/**/*.vue'],
-        globExclude: ['../*/node_modules/**', '../*/dist*/**'],
+        globInclude: ['../shared/app/**/*.vue', '../web/app/**/*.vue'],
+        globExclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
       },
     },
   },

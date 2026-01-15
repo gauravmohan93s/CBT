@@ -85,6 +85,7 @@ watchEffect(() => {
 })
 
 const handleLogin = async () => {
+  if (loading.value) return
   loading.value = true
   errorMsg.value = ''
   successMsg.value = ''
@@ -95,16 +96,22 @@ const handleLogin = async () => {
       password: password.value,
     })
 
-    if (error) throw error
+    if (error) {
+        throw error
+    }
+    
     if (!data.session) {
       throw new Error('Login succeeded but no session was created. Check Supabase auth settings.')
     }
     successMsg.value = 'Signed in successfully. Redirecting...'
-    await router.push('/dashboard')
+    
+    // Use navigateTo for better Nuxt integration
+    await navigateTo('/dashboard', { replace: true })
 
   } catch (error: any) {
     errorMsg.value = error.message
   } finally {
+    // Ensure loading is stopped, even if navigation fails or redirects back
     loading.value = false
   }
 }

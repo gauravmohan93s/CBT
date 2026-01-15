@@ -22,15 +22,25 @@ definePageMeta({
 })
 
 const user = useSupabaseUser()
+const session = useSupabaseSession() // Add session
 const role = useUserRole()
 const profileRole = useProfileRole()
 
-watch([role, user, profileRole.loaded], ([nextRole, nextUser, loaded]) => {
-  if (!nextUser) return
+// Watch effective user (session or user ref)
+const effectiveUser = computed(() => user.value || session.value?.user)
+
+watch([role, effectiveUser, profileRole.loaded], ([nextRole, nextUser, loaded]) => {
+  // FIX: If we already have a role, we trust it and redirect immediately.
   if (nextRole) {
     navigateTo(getDashboardPath(nextRole))
     return
   }
+
+  // Only block if we strictly need the user object to determine the default role
+  if (!nextUser) {
+    return
+  }
+
   if (loaded) {
     navigateTo(getDashboardPath(DEFAULT_ROLE))
   }

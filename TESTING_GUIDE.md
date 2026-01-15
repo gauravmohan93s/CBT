@@ -24,6 +24,7 @@ This guide walks you through verifying the newly developed SaaS features (Onboar
 **Goal:** Verify a new user can sign up and automatically provision an Organization.
 
 1.  **Navigate to:** `http://localhost:3000/login`
+    *   **Verify:** The login page has no settings/gear side panel.
 2.  **Action:** Click **"start your free trial today"**.
 3.  **Navigate to:** `http://localhost:3000/signup`
 4.  **Action:** Fill in the form:
@@ -35,6 +36,7 @@ This guide walks you through verifying the newly developed SaaS features (Onboar
 6.  **Verify:**
     *   You are redirected to `/dashboard/centre-admin`.
     *   The dashboard title says "MY TEST ACADEMY" (or whatever you entered), not "Test Centre Admin".
+    *   Navigating to `/dashboard` shows a loading state and resolves to the same role dashboard.
 
 ---
 

@@ -81,6 +81,13 @@ export default defineNuxtConfig({
       },
     ],
     provider: 'none',
+    // Optimize scanning to exclude node_modules and dist folders explicitly and only scan component files
+    clientBundle: {
+      scan: {
+        globInclude: ['../shared/app/**/*.vue', '../web/app/**/*.vue'],
+        globExclude: ['**/node_modules/**', '**/dist/**', '**/.nuxt/**'],
+      },
+    },
   },
   shadcn: {
     componentDir: '../shared/app/components/ui',

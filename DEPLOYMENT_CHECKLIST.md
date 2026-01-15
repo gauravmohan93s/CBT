@@ -20,8 +20,10 @@ Use this list before every production deploy.
 - [ ] Vercel Production deploy completes without warnings.
 - [ ] `/login`, `/signup`, `/join`, and `/share/result` load publicly.
 - [ ] Role dashboards still redirect correctly after login.
+- [ ] Visiting `/dashboard` shows a loading state and resolves to the correct role dashboard (no blank page).
 
 ## 5) Post-Deploy Verification
 - [ ] Create a test org and publish a PDF.
 - [ ] Take a test and confirm a result is created in Supabase.
 - [ ] Generate and open a public result link.
+- [ ] Center Admin dashboard CTAs route to `/pdf-cropper`, `/cbt/results`, and `/cbt/generate-answer-key`.

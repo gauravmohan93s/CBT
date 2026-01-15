@@ -115,6 +115,7 @@ This project is a monorepo workspace (using PNPM) aimed at transforming a PDF-to
 - **SaaS Features:** Tenant onboarding, Branding engine, and Invite system are implemented.
 - **Cloud Infrastructure:** Database schemas for Exams, Results, and Storage buckets are deployed.
 - **Reporting:** Automated PDF reports and Public "Magic Links" are available.
+- **Navigation & Routing:** `/dashboard` shows a loading state and resolves to the role dashboard; admin/student CTAs route to live modules; Super Admin billing placeholder added.
 
 ### Planned Work (Near Term - Completed)
 - [x] Build admin/students CRUD and test assignment flows.
@@ -131,6 +132,7 @@ This project is a monorepo workspace (using PNPM) aimed at transforming a PDF-to
 - Auth gating now checks both `useSupabaseUser()` and `useSupabaseSession()` to avoid redirect loops.
 - Supabase auto-redirect is disabled; `apps/web/app/middleware/auth.global.ts` controls public vs protected routes.
 - Use `/dashboard` as the default post-login route; it resolves to the role dashboard.
+- The settings sheet (gear icon) is dev-only and hidden on public auth/share pages.
 
 ---
 

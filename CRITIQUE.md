@@ -3,6 +3,11 @@
 ## Executive Summary
 The current **MockCBT** codebase is a robust "Utility Tool" (PDF to CBT converter) with a strong offline-first foundation (Dexie.js). However, to succeed as a **SaaS Platform**, it requires a shift in focus from *test delivery* to *user retention (stickiness)* and *tenant management*. The current architecture is well-positioned for this transition, but critical "loops" for user engagement and data synchronization are missing.
 
+### Recent UX Fixes (Implemented)
+*   **Login Cleanliness:** The settings/gear side panel is hidden on public auth/share pages to keep login focused.
+*   **Role Routing Resilience:** `/dashboard` now shows a loading state and resolves to the correct role dashboard even if profile roles load late.
+*   **Actionable Dashboards:** Center Admin and Student CTAs now route to live modules (PDF Cropper, Results, Answer Key, Test Interface). A Super Admin billing placeholder is available.
+
 ---
 
 ## 1. Critical Gaps & Analysis
